@@ -7,6 +7,7 @@
 - Risk engine separate from strategy logic
 - Structured AI agent decision service
 - Backtesting, paper trading, demo market data, and Postgres-backed audit ledgers
+- Strategy SDK, plugin registry, and explainable agent framework
 
 ## v2: Execution Readiness
 
@@ -15,6 +16,7 @@
 - Audit logs for every agent decision and risk rejection
 - More robust historical market data ingestion
 - Role-based access controls for teams and funds
+- Strategy submission review workflow and signed plugin bundles
 
 ## v3: Institutional Platform
 

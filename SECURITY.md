@@ -5,6 +5,7 @@
 - Real trading disabled by default and by design in v1
 - `.env.example` documents required variables without secrets
 - Risk engine is independent from strategy logic
+- Strategy plugins cannot execute trades directly
 - Paper execution refuses trades rejected by risk controls
 - Demo metrics are labeled simulated
 - Agent decisions are stored in an append-style audit ledger when Postgres is configured

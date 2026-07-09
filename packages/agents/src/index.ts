@@ -1,13 +1,6 @@
-import {
-  breakoutStrategy,
-  evaluateRisk,
-  meanReversionStrategy,
-  strategies,
-  trendFollowingStrategy,
-  volatilityRegimeStrategy,
-  volatilityScore
-} from "@massifx/core";
+import { evaluateRisk, volatilityScore } from "@massifx/core";
 import type { Candle, RiskResult, RiskState, StrategyDecision } from "@massifx/core";
+import { createDefaultStrategyRegistry, type AgentPlugin, type StrategyPluginRegistry } from "@massifx/sdk";
 
 export type MarketRegime = "trending" | "mean_reverting" | "breakout" | "high_volatility";
 
@@ -17,13 +10,109 @@ export interface AgentDecision {
   timestamp: string;
   regime: MarketRegime;
   selectedStrategy: string;
+  selectedStrategyId: string;
   decision: StrategyDecision;
   risk: RiskResult;
   refused: boolean;
   rationale: string;
+  agentReasoning: string;
 }
 
-function detectRegime(candles: Candle[]): MarketRegime {
+export interface AgentRuntimeConfig {
+  strategyRegistry?: StrategyPluginRegistry;
+  selector?: AgentPlugin;
+}
+
+export interface AgentDecisionInput {
+  symbol: string;
+  candles: Candle[];
+  portfolioValue: number;
+  riskState?: Partial<RiskState>;
+}
+
+export const sentinelAgentPlugin: AgentPlugin = {
+  manifest: {
+    id: "massifx-sentinel",
+    name: "MassifX Sentinel",
+    version: "1.0.0",
+    description: "Default explainable MassifX agent that detects regime, selects a strategy plugin, and defers execution to risk controls.",
+    author: "MassifX",
+    capabilities: ["regime_detection", "strategy_selection", "risk_explanation"]
+  },
+  decide(context) {
+    const regime = detectRegime(context.candles);
+    const selectedStrategyId =
+      regime === "high_volatility" ? "volatility-regime" :
+      regime === "breakout" ? "breakout" :
+      regime === "trending" ? "moving-average-trend" :
+      "mean-reversion";
+
+    return {
+      selectedStrategyId,
+      reasoning: `Detected ${regime} regime and selected ${selectedStrategyId} from the registered strategy plugins.`
+    };
+  }
+};
+
+export function createAgentRuntime(config: AgentRuntimeConfig = {}) {
+  const strategyRegistry = config.strategyRegistry ?? createDefaultStrategyRegistry();
+  const selector = config.selector ?? sentinelAgentPlugin;
+
+  return {
+    strategyRegistry,
+    selector,
+    async decide(params: AgentDecisionInput): Promise<AgentDecision> {
+      const regime = detectRegime(params.candles);
+      const pluginDecision = await selector.decide({
+        symbol: params.symbol,
+        candles: params.candles,
+        portfolioValue: params.portfolioValue,
+        riskState: params.riskState,
+        strategyRegistry: strategyRegistry.list()
+      });
+      const selected = strategyRegistry.require(pluginDecision.selectedStrategyId);
+      const decision = await selected.evaluate({
+        symbol: params.symbol,
+        candles: params.candles,
+        portfolioValue: params.portfolioValue,
+        parameters: defaultParametersFor(selected.manifest.parameters)
+      });
+      const riskState: RiskState = {
+        portfolioValue: params.portfolioValue,
+        dailyPnlPct: params.riskState?.dailyPnlPct ?? -0.004,
+        openPositions: params.riskState?.openPositions ?? 1,
+        volatilityScore: params.riskState?.volatilityScore ?? decision.riskScore
+      };
+      const risk = evaluateRisk(decision, riskState);
+      const refused = !risk.approved || decision.signal === "hold" || Boolean(pluginDecision.refusalReason);
+
+      const riskReason = risk.reasons.join(" ");
+      const refusalReason = pluginDecision.refusalReason ?? (riskReason || "agent selected hold.");
+
+      return {
+        agent: "MassifX Sentinel",
+        symbol: params.symbol,
+        timestamp: new Date().toISOString(),
+        regime,
+        selectedStrategy: selected.manifest.name,
+        selectedStrategyId: selected.manifest.id,
+        decision,
+        risk,
+        refused,
+        rationale: refused
+          ? `Trade refused: ${refusalReason}`
+          : `Agent selected ${selected.manifest.name} in a ${regime} regime with ${(decision.confidence * 100).toFixed(0)}% confidence.`,
+        agentReasoning: pluginDecision.reasoning
+      };
+    }
+  };
+}
+
+export async function produceAgentDecision(params: AgentDecisionInput): Promise<AgentDecision> {
+  return createAgentRuntime().decide(params);
+}
+
+export function detectRegime(candles: Candle[]): MarketRegime {
   const closes = candles.map((candle) => candle.close);
   const last = closes.at(-1) ?? 0;
   const previous = closes.at(-24) ?? last;
@@ -39,46 +128,8 @@ function detectRegime(candles: Candle[]): MarketRegime {
   return "mean_reverting";
 }
 
-export function produceAgentDecision(params: {
-  symbol: string;
-  candles: Candle[];
-  portfolioValue: number;
-  riskState?: Partial<RiskState>;
-}): AgentDecision {
-  const regime = detectRegime(params.candles);
-  const strategy =
-    regime === "high_volatility" ? volatilityRegimeStrategy :
-    regime === "breakout" ? breakoutStrategy :
-    regime === "trending" ? trendFollowingStrategy :
-    meanReversionStrategy;
+export const availableStrategies = createDefaultStrategyRegistry().list().map((entry) => entry.manifest.name);
 
-  const decision = strategy.evaluate({
-    symbol: params.symbol,
-    candles: params.candles,
-    portfolioValue: params.portfolioValue
-  });
-  const riskState: RiskState = {
-    portfolioValue: params.portfolioValue,
-    dailyPnlPct: params.riskState?.dailyPnlPct ?? -0.004,
-    openPositions: params.riskState?.openPositions ?? 1,
-    volatilityScore: params.riskState?.volatilityScore ?? decision.riskScore
-  };
-  const risk = evaluateRisk(decision, riskState);
-  const refused = !risk.approved || decision.signal === "hold";
-
-  return {
-    agent: "MassifX Sentinel",
-    symbol: params.symbol,
-    timestamp: new Date().toISOString(),
-    regime,
-    selectedStrategy: decision.strategy,
-    decision,
-    risk,
-    refused,
-    rationale: refused
-      ? `Trade refused: ${risk.reasons.join(" ") || "agent selected hold."}`
-      : `Agent selected ${decision.strategy} in a ${regime} regime with ${(decision.confidence * 100).toFixed(0)}% confidence.`
-  };
+function defaultParametersFor(parameters: Array<{ key: string; defaultValue?: number | string | boolean }>) {
+  return Object.fromEntries(parameters.map((parameter) => [parameter.key, parameter.defaultValue]).filter(([, value]) => value !== undefined));
 }
-
-export const availableStrategies = strategies.map((strategy) => strategy.name);

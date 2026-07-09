@@ -10,6 +10,7 @@ MassifX v1 is a production-oriented MVP for crypto trading intelligence, strateg
 - NextAuth credentials demo auth
 - PostgreSQL schema via Prisma
 - Modular packages for strategy, risk, backtesting, agent decisions, data adapters, and database utilities
+- Strategy SDK, plugin registry, and agent framework for third-party extensions
 - Vitest coverage for core quant logic
 - Docker Compose for local Postgres and app runtime
 
@@ -54,3 +55,9 @@ MassifX v1 is paper trading only. Strategy output is educational and simulated. 
 The demo dashboard uses PostgreSQL when `DATABASE_URL` is available. `pnpm db:migrate` creates the user, portfolio, trade, decision audit, and backtest ledger tables. `pnpm db:seed` upserts the demo account, demo paper portfolio, sample paper trades, one audited agent decision, and one persisted backtest run.
 
 If Postgres is not running, the web app falls back to in-memory demo data and clearly labels the ledger as a fallback.
+
+## Platform SDK
+
+Third-party strategies should build against `@massifx/sdk`. The SDK provides strategy manifests, parameter schemas, validation, a plugin registry, built-in strategy adapters, and an example RSI strategy. Agents in `@massifx/agents` select from registered strategy plugins and still route every decision through the independent risk engine.
+
+See `docs/STRATEGY_SDK.md` and `docs/AGENT_FRAMEWORK.md`.

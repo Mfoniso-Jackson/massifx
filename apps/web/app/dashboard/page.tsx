@@ -7,7 +7,7 @@ import { getPersistenceContext } from "@/lib/persistence";
 
 export default async function Dashboard() {
   const session = await getServerSession();
-  const demo = getDemoSnapshot();
+  const demo = await getDemoSnapshot();
   const persistence = session ? await getPersistenceContext() : { enabled: false };
   const decisionAudits = persistence.ledger?.decisionAudits ?? [];
   const backtestRuns = persistence.ledger?.backtestRuns ?? [];

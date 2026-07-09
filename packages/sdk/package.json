@@ -1,5 +1,5 @@
 {
-  "name": "@massifx/agents",
+  "name": "@massifx/sdk",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -8,11 +8,10 @@
   "scripts": {
     "build": "tsc -p tsconfig.json --noEmit",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run"
   },
   "dependencies": {
-    "@massifx/core": "workspace:*",
-    "@massifx/sdk": "workspace:*"
+    "@massifx/core": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.7.2",

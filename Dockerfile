@@ -4,6 +4,7 @@ RUN corepack enable
 COPY package.json pnpm-workspace.yaml ./
 COPY apps/web/package.json apps/web/package.json
 COPY packages/core/package.json packages/core/package.json
+COPY packages/sdk/package.json packages/sdk/package.json
 COPY packages/agents/package.json packages/agents/package.json
 COPY packages/data/package.json packages/data/package.json
 COPY packages/db/package.json packages/db/package.json

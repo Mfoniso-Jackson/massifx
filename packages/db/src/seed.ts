@@ -7,7 +7,7 @@ import { recordBacktestRun, recordDecisionAudit } from "./ledger";
 async function main() {
   const { user, portfolio } = await ensureDemoAccount();
   const candles = generateDemoCandles();
-  const agentDecision = produceAgentDecision({ symbol: "BTCUSDT", candles, portfolioValue: Number(portfolio.balance) });
+  const agentDecision = await produceAgentDecision({ symbol: "BTCUSDT", candles, portfolioValue: Number(portfolio.balance) });
   await recordDecisionAudit({ decision: agentDecision, userId: user.id, portfolioId: portfolio.id });
 
   const backtest = runBacktest({

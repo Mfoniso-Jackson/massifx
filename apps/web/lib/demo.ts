@@ -1,10 +1,10 @@
 import { produceAgentDecision } from "@massifx/agents";
 import { generateDemoCandles, runBacktest, simulatePaperTrade, trendFollowingStrategy } from "@massifx/core";
 
-export function getDemoSnapshot() {
+export async function getDemoSnapshot() {
   const candles = generateDemoCandles();
   const portfolioValue = 125_430;
-  const agentDecision = produceAgentDecision({ symbol: "BTCUSDT", candles, portfolioValue });
+  const agentDecision = await produceAgentDecision({ symbol: "BTCUSDT", candles, portfolioValue });
   const backtest = runBacktest({ symbol: "BTCUSDT", candles, strategy: trendFollowingStrategy, initialBalance: 100_000 });
   const paper = simulatePaperTrade({
     account: { balance: 50_000, openPositions: [], trades: [] },
@@ -46,4 +46,4 @@ export function getDemoSnapshot() {
   };
 }
 
-export type DemoSnapshot = ReturnType<typeof getDemoSnapshot>;
+export type DemoSnapshot = Awaited<ReturnType<typeof getDemoSnapshot>>;

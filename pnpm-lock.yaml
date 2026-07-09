@@ -90,6 +90,9 @@ importers:
       '@massifx/core':
         specifier: workspace:*
         version: link:../core
+      '@massifx/sdk':
+        specifier: workspace:*
+        version: link:../sdk
     devDependencies:
       typescript:
         specifier: ^5.7.2
@@ -138,6 +141,19 @@ importers:
       tsx:
         specifier: ^4.19.2
         version: 4.23.0
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@22.20.0)
+
+  packages/sdk:
+    dependencies:
+      '@massifx/core':
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
