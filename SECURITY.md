@@ -7,6 +7,7 @@
 - Risk engine is independent from strategy logic
 - Paper execution refuses trades rejected by risk controls
 - Demo metrics are labeled simulated
+- Agent decisions are stored in an append-style audit ledger when Postgres is configured
 - No API keys, private keys, seed phrases, or exchange credentials are committed
 
 ## Future Requirements Before Live Trading
@@ -15,6 +16,7 @@
 - Per-user exchange key encryption
 - Withdrawal-disabled exchange keys only
 - Formal audit log for every decision, risk result, and order event
+- Immutable decision-ledger retention and tamper-evident hashing
 - Manual kill switch and global trading halt
 - Rate limits, abuse controls, and IP/session monitoring
 - Independent security review before enabling any real execution

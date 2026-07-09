@@ -10,7 +10,9 @@
     "lint": "pnpm --filter @massifx/web lint",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
-    "prisma:generate": "pnpm --filter @massifx/db prisma generate"
+    "prisma:generate": "pnpm --filter @massifx/db prisma generate",
+    "db:migrate": "pnpm --filter @massifx/db prisma migrate dev",
+    "db:seed": "pnpm --filter @massifx/db seed"
   },
   "devDependencies": {
     "@types/node": "^22.10.2",

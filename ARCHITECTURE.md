@@ -15,8 +15,14 @@ MassifX is organized as a pnpm monorepo.
 2. API routes call the agent package with OHLCV candles.
 3. The agent detects regime, selects a strategy, and emits a structured JSON decision.
 4. The risk engine evaluates the decision independently.
-5. Paper trading can simulate execution only when risk approves the trade.
-6. Backtests run against supplied OHLCV arrays and return metrics, trades, and equity curve.
+5. Agent decisions are written to the decision audit ledger when Postgres is available.
+6. Paper trading can simulate execution only when risk approves the trade.
+7. Backtests run against supplied OHLCV arrays and return metrics, trades, and equity curve.
+8. Backtest runs, trades, and equity points are persisted for the demo portfolio when Postgres is available.
+
+## Persistence Model
+
+The Prisma schema stores users, demo portfolios, paper trades, decision audits, backtest runs, backtest trades, and equity curve points. The web app calls persistence through a small server-side wrapper that degrades to demo-only mode if the database is unavailable.
 
 ## Execution Boundary
 

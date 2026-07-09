@@ -19,6 +19,8 @@ MassifX v1 is a production-oriented MVP for crypto trading intelligence, strateg
 pnpm install
 cp .env.example .env
 pnpm prisma:generate
+pnpm db:migrate
+pnpm db:seed
 pnpm dev
 ```
 
@@ -34,6 +36,8 @@ pnpm test
 pnpm typecheck
 pnpm lint
 pnpm build
+pnpm db:migrate
+pnpm db:seed
 docker compose up --build
 ```
 
@@ -44,3 +48,9 @@ docker compose up --build
 ## Safety Notice
 
 MassifX v1 is paper trading only. Strategy output is educational and simulated. Do not connect live exchange credentials to this version.
+
+## Persistence
+
+The demo dashboard uses PostgreSQL when `DATABASE_URL` is available. `pnpm db:migrate` creates the user, portfolio, trade, decision audit, and backtest ledger tables. `pnpm db:seed` upserts the demo account, demo paper portfolio, sample paper trades, one audited agent decision, and one persisted backtest run.
+
+If Postgres is not running, the web app falls back to in-memory demo data and clearly labels the ledger as a fallback.

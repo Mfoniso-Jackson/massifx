@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 
 const handler = NextAuth({
   session: { strategy: "jwt" },
+  secret: process.env.NEXTAUTH_SECRET ?? "massifx-local-demo-secret-do-not-use-in-production",
   pages: { signIn: "/dashboard" },
   providers: [
     CredentialsProvider({

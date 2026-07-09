@@ -8,13 +8,15 @@ datasource db {
 }
 
 model User {
-  id        String     @id @default(cuid())
-  email     String     @unique
-  name      String?
-  createdAt DateTime   @default(now())
-  accounts  Account[]
-  sessions  Session[]
-  portfolios Portfolio[]
+  id             String          @id @default(cuid())
+  email          String          @unique
+  name           String?
+  createdAt      DateTime        @default(now())
+  accounts       Account[]
+  sessions       Session[]
+  portfolios     Portfolio[]
+  decisionAudits DecisionAudit[]
+  backtestRuns   BacktestRun[]
 }
 
 model Account {
@@ -52,13 +54,15 @@ model VerificationToken {
 }
 
 model Portfolio {
-  id        String   @id @default(cuid())
-  userId    String
-  name      String
-  balance   Decimal
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  trades    Trade[]
+  id             String          @id @default(cuid())
+  userId         String
+  name           String
+  balance        Decimal
+  createdAt      DateTime        @default(now())
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  trades         Trade[]
+  decisionAudits DecisionAudit[]
+  backtestRuns   BacktestRun[]
 }
 
 model Trade {
@@ -74,4 +78,71 @@ model Trade {
   openedAt    DateTime  @default(now())
   closedAt    DateTime?
   portfolio   Portfolio @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+}
+
+model DecisionAudit {
+  id                 String    @id @default(cuid())
+  userId             String?
+  portfolioId        String?
+  symbol             String
+  agent              String
+  regime             String
+  strategy           String
+  signal             String
+  confidence         Float
+  riskScore          Float
+  suggestedSize      Decimal
+  stopLossPct        Float
+  riskApproved       Boolean
+  refused            Boolean
+  riskReasons        Json
+  rationale          String
+  decisionJson       Json
+  createdAt          DateTime  @default(now())
+  user               User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  portfolio          Portfolio? @relation(fields: [portfolioId], references: [id], onDelete: SetNull)
+}
+
+model BacktestRun {
+  id            String             @id @default(cuid())
+  userId        String?
+  portfolioId   String?
+  symbol        String
+  strategy      String
+  initialBalance Decimal
+  totalReturn   Float
+  maxDrawdown   Float
+  sharpeRatio   Float
+  winRate       Float
+  tradeCount    Int
+  createdAt     DateTime           @default(now())
+  user          User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+  portfolio     Portfolio?         @relation(fields: [portfolioId], references: [id], onDelete: SetNull)
+  equityCurve   BacktestEquityPoint[]
+  trades        BacktestTrade[]
+}
+
+model BacktestEquityPoint {
+  id          String      @id @default(cuid())
+  backtestId  String
+  timestamp   DateTime
+  equity      Decimal
+  backtest    BacktestRun @relation(fields: [backtestId], references: [id], onDelete: Cascade)
+
+  @@index([backtestId, timestamp])
+}
+
+model BacktestTrade {
+  id          String      @id @default(cuid())
+  backtestId  String
+  symbol      String
+  side        String
+  quantity    Decimal
+  entryPrice  Decimal
+  exitPrice   Decimal?
+  pnl         Decimal?
+  openedAt    DateTime
+  closedAt    DateTime?
+  strategy    String
+  backtest    BacktestRun @relation(fields: [backtestId], references: [id], onDelete: Cascade)
 }

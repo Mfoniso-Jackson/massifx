@@ -45,3 +45,5 @@ export function getDemoSnapshot() {
     paper
   };
 }
+
+export type DemoSnapshot = ReturnType<typeof getDemoSnapshot>;

@@ -3,10 +3,14 @@ import { Activity, AlertTriangle, BadgeDollarSign, BrainCircuit, ShieldCheck } f
 import { DashboardCharts } from "@/components/DashboardCharts";
 import { SignInPanel } from "@/components/SignInPanel";
 import { getDemoSnapshot } from "@/lib/demo";
+import { getPersistenceContext } from "@/lib/persistence";
 
 export default async function Dashboard() {
   const session = await getServerSession();
   const demo = getDemoSnapshot();
+  const persistence = session ? await getPersistenceContext() : { enabled: false };
+  const decisionAudits = persistence.ledger?.decisionAudits ?? [];
+  const backtestRuns = persistence.ledger?.backtestRuns ?? [];
 
   if (!session) {
     return (
@@ -36,7 +40,12 @@ export default async function Dashboard() {
             <p className="text-sm text-mint">Simulated investor demo</p>
             <h1 className="text-3xl font-semibold">MassifX command dashboard</h1>
           </div>
-          <div className="rounded-md border border-mint/30 bg-mint/10 px-3 py-2 text-sm text-mint">Paper trading only</div>
+          <div className="flex flex-wrap gap-2">
+            <div className="rounded-md border border-mint/30 bg-mint/10 px-3 py-2 text-sm text-mint">Paper trading only</div>
+            <div className="rounded-md border border-white/15 bg-white/5 px-3 py-2 text-sm text-ice/70">
+              Ledger {persistence.enabled ? "connected" : "demo fallback"}
+            </div>
+          </div>
         </header>
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -67,6 +76,47 @@ export default async function Dashboard() {
               <h2 className="font-semibold">Recent agent decision JSON</h2>
             </div>
             <pre className="max-h-72 overflow-auto rounded-md bg-black/30 p-4 text-xs leading-5 text-ice/80">{JSON.stringify(demo.agentDecision, null, 2)}</pre>
+          </div>
+        </section>
+
+        <section className="mt-4 grid gap-4 lg:grid-cols-[1fr_1fr]">
+          <div className="metric-card p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-semibold">Decision audit ledger</h2>
+              <span className="text-xs text-ice/55">{persistence.enabled ? "Postgres" : "Fallback"}</span>
+            </div>
+            <div className="grid gap-3">
+              {decisionAudits.length === 0 ? (
+                <p className="text-sm text-ice/60">No persisted agent decisions yet.</p>
+              ) : decisionAudits.map((audit) => (
+                <div className="rounded-md bg-white/5 px-3 py-3 text-sm" key={audit.id}>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-medium">{audit.symbol} · {audit.signal.toUpperCase()}</span>
+                    <span className={audit.riskApproved ? "text-mint" : "text-amber"}>{audit.riskApproved ? "approved" : "refused"}</span>
+                  </div>
+                  <p className="mt-1 text-xs text-ice/55">{audit.strategy} · {audit.regime} · {audit.createdAt.toLocaleString()}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="metric-card p-5">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="font-semibold">Persisted backtests</h2>
+              <span className="text-xs text-ice/55">{backtestRuns.length} runs</span>
+            </div>
+            <div className="grid gap-3">
+              {backtestRuns.length === 0 ? (
+                <p className="text-sm text-ice/60">Run the backtest API or seed script to populate this ledger.</p>
+              ) : backtestRuns.map((run) => (
+                <div className="rounded-md bg-white/5 px-3 py-3 text-sm" key={run.id}>
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="font-medium">{run.strategy}</span>
+                    <span className="text-mint">{(run.totalReturn * 100).toFixed(2)}%</span>
+                  </div>
+                  <p className="mt-1 text-xs text-ice/55">{run.symbol} · {run.tradeCount} trades · Sharpe {run.sharpeRatio.toFixed(2)}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 

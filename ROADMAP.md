@@ -6,7 +6,7 @@
 - Strategy engine with trend, mean reversion, breakout, and volatility regime modules
 - Risk engine separate from strategy logic
 - Structured AI agent decision service
-- Backtesting, paper trading, and demo market data
+- Backtesting, paper trading, demo market data, and Postgres-backed audit ledgers
 
 ## v2: Execution Readiness
 
