@@ -32,6 +32,9 @@ importers:
       '@massifx/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@massifx/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
       '@next-auth/prisma-adapter':
         specifier: ^1.0.7
         version: 1.0.7(@prisma/client@6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3))(next-auth@4.24.14(next@15.5.20(react-dom@19.2.7(react@19.2.7))(react@19.2.7))(react-dom@19.2.7(react@19.2.7))(react@19.2.7))
@@ -131,6 +134,9 @@ importers:
       '@massifx/core':
         specifier: workspace:*
         version: link:../core
+      '@massifx/sdk':
+        specifier: workspace:*
+        version: link:../sdk
       '@prisma/client':
         specifier: ^6.1.0
         version: 6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3)

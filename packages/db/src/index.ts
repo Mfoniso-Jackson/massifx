@@ -12,3 +12,4 @@ export type JsonValue = Prisma.InputJsonValue;
 
 export * from "./demo";
 export * from "./ledger";
+export * from "./strategies";

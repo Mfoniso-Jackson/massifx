@@ -52,6 +52,10 @@ const registry = new StrategyPluginRegistry().register(myStrategy);
 
 The registry validates manifests before accepting plugins. Duplicate plugin IDs are rejected.
 
+## Marketplace Persistence
+
+Production deployments persist plugin manifests in `StrategyCatalogEntry` and per-portfolio enablement in `PortfolioStrategy`. The dashboard strategy marketplace can render from Postgres or fall back to SDK built-ins when a database is not configured.
+
 ## Current Built-Ins
 
 - `moving-average-trend`

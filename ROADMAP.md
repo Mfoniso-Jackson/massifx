@@ -8,6 +8,7 @@
 - Structured AI agent decision service
 - Backtesting, paper trading, demo market data, and Postgres-backed audit ledgers
 - Strategy SDK, plugin registry, and explainable agent framework
+- Strategy marketplace view with per-portfolio activation state
 
 ## v2: Execution Readiness
 
@@ -17,6 +18,7 @@
 - More robust historical market data ingestion
 - Role-based access controls for teams and funds
 - Strategy submission review workflow and signed plugin bundles
+- Backtest-from-marketplace workflow with parameter editing and version comparison
 
 ## v3: Institutional Platform
 

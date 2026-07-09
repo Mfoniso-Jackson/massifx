@@ -1,6 +1,7 @@
-import { ensureDemoAccount, getDemoLedgerSnapshot, prisma, recordBacktestRun, recordDecisionAudit } from "@massifx/db";
+import { ensureDemoAccount, getDemoLedgerSnapshot, getStrategyMarketplace, prisma, recordBacktestRun, recordDecisionAudit, seedBuiltInStrategies, setPortfolioStrategyEnabled } from "@massifx/db";
 import type { AgentDecision } from "@massifx/agents";
 import type { BacktestResult } from "@massifx/core";
+import { builtInStrategyPlugins } from "@massifx/sdk";
 
 export interface PersistenceContext {
   enabled: boolean;
@@ -57,4 +58,83 @@ export async function persistBacktest(result: BacktestResult) {
 
 export async function disconnectPersistence() {
   await prisma.$disconnect();
+}
+
+export async function getStrategyMarketplaceSnapshot() {
+  if (!process.env.DATABASE_URL) {
+    return {
+      persisted: false,
+      strategies: builtInStrategyPlugins.map((plugin, index) => ({
+        id: plugin.manifest.id,
+        name: plugin.manifest.name,
+        version: plugin.manifest.version,
+        description: plugin.manifest.description,
+        author: plugin.manifest.author,
+        riskDisclosure: plugin.manifest.riskDisclosure,
+        tags: plugin.manifest.tags,
+        parameters: plugin.manifest.parameters,
+        source: "built_in",
+        status: "approved",
+        enabled: index === 0 || plugin.manifest.id === "breakout"
+      }))
+    };
+  }
+
+  try {
+    const { portfolio } = await ensureDemoAccount();
+    await seedBuiltInStrategies();
+    const strategies = await getStrategyMarketplace({ portfolioId: portfolio.id });
+    return {
+      persisted: true,
+      strategies: strategies.map((strategy) => ({
+        id: strategy.id,
+        name: strategy.name,
+        version: strategy.version,
+        description: strategy.description,
+        author: strategy.author,
+        riskDisclosure: strategy.riskDisclosure,
+        tags: strategy.tags,
+        parameters: strategy.parameters,
+        source: strategy.source,
+        status: strategy.status,
+        enabled: Boolean(strategy.activation?.enabled)
+      }))
+    };
+  } catch (error) {
+    console.warn("Unable to load persisted strategy marketplace; using SDK fallback.", error);
+    return getStrategyMarketplaceFallback();
+  }
+}
+
+export async function setStrategyActivation(strategyId: string, enabled: boolean) {
+  if (!process.env.DATABASE_URL) return { persisted: false, strategyId, enabled };
+
+  try {
+    const { portfolio } = await ensureDemoAccount();
+    await seedBuiltInStrategies();
+    await setPortfolioStrategyEnabled({ portfolioId: portfolio.id, strategyId, enabled });
+    return { persisted: true, strategyId, enabled };
+  } catch (error) {
+    console.warn("Unable to persist strategy activation.", error);
+    return { persisted: false, strategyId, enabled };
+  }
+}
+
+function getStrategyMarketplaceFallback() {
+  return {
+    persisted: false,
+    strategies: builtInStrategyPlugins.map((plugin) => ({
+      id: plugin.manifest.id,
+      name: plugin.manifest.name,
+      version: plugin.manifest.version,
+      description: plugin.manifest.description,
+      author: plugin.manifest.author,
+      riskDisclosure: plugin.manifest.riskDisclosure,
+      tags: plugin.manifest.tags,
+      parameters: plugin.manifest.parameters,
+      source: "built_in",
+      status: "approved",
+      enabled: plugin.manifest.id === "moving-average-trend" || plugin.manifest.id === "breakout"
+    }))
+  };
 }

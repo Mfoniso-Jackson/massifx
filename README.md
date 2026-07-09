@@ -61,3 +61,5 @@ If Postgres is not running, the web app falls back to in-memory demo data and cl
 Third-party strategies should build against `@massifx/sdk`. The SDK provides strategy manifests, parameter schemas, validation, a plugin registry, built-in strategy adapters, and an example RSI strategy. Agents in `@massifx/agents` select from registered strategy plugins and still route every decision through the independent risk engine.
 
 See `docs/STRATEGY_SDK.md` and `docs/AGENT_FRAMEWORK.md`.
+
+The web dashboard includes `/dashboard/strategies`, a strategy marketplace view backed by Postgres when available and SDK fallback data otherwise. Built-in strategies are seeded into `StrategyCatalogEntry`, and demo portfolio activations are stored in `PortfolioStrategy`.

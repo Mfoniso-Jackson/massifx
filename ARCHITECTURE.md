@@ -25,6 +25,8 @@ MassifX is organized as a pnpm monorepo.
 
 The Prisma schema stores users, demo portfolios, paper trades, decision audits, backtest runs, backtest trades, and equity curve points. The web app calls persistence through a small server-side wrapper that degrades to demo-only mode if the database is unavailable.
 
+The strategy marketplace stores plugin manifests in `StrategyCatalogEntry` and per-portfolio enablement in `PortfolioStrategy`. When Postgres is unavailable, the web layer renders the SDK built-in registry as a fallback.
+
 ## Platform Extension Model
 
 Strategies are SDK plugins with manifests, parameter schemas, risk disclosures, and deterministic `evaluate` functions. Agents are selectors that choose from the registered plugin list and explain why a strategy was selected. Neither strategies nor agents can execute trades directly.

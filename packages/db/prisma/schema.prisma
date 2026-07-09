@@ -63,6 +63,7 @@ model Portfolio {
   trades         Trade[]
   decisionAudits DecisionAudit[]
   backtestRuns   BacktestRun[]
+  strategies     PortfolioStrategy[]
 }
 
 model Trade {
@@ -145,4 +146,34 @@ model BacktestTrade {
   closedAt    DateTime?
   strategy    String
   backtest    BacktestRun @relation(fields: [backtestId], references: [id], onDelete: Cascade)
+}
+
+model StrategyCatalogEntry {
+  id             String              @id
+  name           String
+  version        String
+  description    String
+  author         String
+  riskDisclosure String
+  tags           Json
+  parameters     Json
+  source         String
+  status         String
+  createdAt      DateTime            @default(now())
+  updatedAt      DateTime            @updatedAt
+  activations    PortfolioStrategy[]
+}
+
+model PortfolioStrategy {
+  id          String               @id @default(cuid())
+  portfolioId String
+  strategyId  String
+  enabled     Boolean              @default(false)
+  parameters  Json
+  createdAt   DateTime             @default(now())
+  updatedAt   DateTime             @updatedAt
+  portfolio   Portfolio            @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
+  strategy    StrategyCatalogEntry @relation(fields: [strategyId], references: [id], onDelete: Cascade)
+
+  @@unique([portfolioId, strategyId])
 }

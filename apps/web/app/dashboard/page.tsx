@@ -1,4 +1,5 @@
 import { getServerSession } from "next-auth";
+import Link from "next/link";
 import { Activity, AlertTriangle, BadgeDollarSign, BrainCircuit, ShieldCheck } from "lucide-react";
 import { DashboardCharts } from "@/components/DashboardCharts";
 import { SignInPanel } from "@/components/SignInPanel";
@@ -41,6 +42,9 @@ export default async function Dashboard() {
             <h1 className="text-3xl font-semibold">MassifX command dashboard</h1>
           </div>
           <div className="flex flex-wrap gap-2">
+            <Link className="rounded-md border border-white/15 bg-white/5 px-3 py-2 text-sm text-ice/70 hover:border-mint hover:text-mint" href="/dashboard/strategies">
+              Strategies
+            </Link>
             <div className="rounded-md border border-mint/30 bg-mint/10 px-3 py-2 text-sm text-mint">Paper trading only</div>
             <div className="rounded-md border border-white/15 bg-white/5 px-3 py-2 text-sm text-ice/70">
               Ledger {persistence.enabled ? "connected" : "demo fallback"}

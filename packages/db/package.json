@@ -15,6 +15,7 @@
   "dependencies": {
     "@massifx/agents": "workspace:*",
     "@massifx/core": "workspace:*",
+    "@massifx/sdk": "workspace:*",
     "@prisma/client": "^6.1.0"
   },
   "devDependencies": {

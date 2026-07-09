@@ -3,9 +3,13 @@ import { generateDemoCandles, runBacktest, trendFollowingStrategy } from "@massi
 import { ensureDemoAccount } from "./demo";
 import { prisma } from "./index";
 import { recordBacktestRun, recordDecisionAudit } from "./ledger";
+import { seedBuiltInStrategies, setPortfolioStrategyEnabled } from "./strategies";
 
 async function main() {
   const { user, portfolio } = await ensureDemoAccount();
+  await seedBuiltInStrategies();
+  await setPortfolioStrategyEnabled({ portfolioId: portfolio.id, strategyId: "moving-average-trend", enabled: true });
+  await setPortfolioStrategyEnabled({ portfolioId: portfolio.id, strategyId: "breakout", enabled: true });
   const candles = generateDemoCandles();
   const agentDecision = await produceAgentDecision({ symbol: "BTCUSDT", candles, portfolioValue: Number(portfolio.balance) });
   await recordDecisionAudit({ decision: agentDecision, userId: user.id, portfolioId: portfolio.id });
