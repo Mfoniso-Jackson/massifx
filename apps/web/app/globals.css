@@ -1,0 +1,23 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: #071013;
+  color: #f5fbfc;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.metric-card {
+  border: 1px solid rgba(217, 247, 255, 0.12);
+  background: rgba(255, 255, 255, 0.045);
+  border-radius: 8px;
+}

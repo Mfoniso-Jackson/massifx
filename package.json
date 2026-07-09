@@ -1,0 +1,21 @@
+{
+  "name": "massifx",
+  "private": true,
+  "version": "0.1.0",
+  "description": "AI quant infrastructure for crypto traders, funds, and autonomous trading agents.",
+  "license": "MIT",
+  "scripts": {
+    "dev": "pnpm --filter @massifx/web dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm --filter @massifx/web lint",
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck",
+    "prisma:generate": "pnpm --filter @massifx/db prisma generate"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  },
+  "packageManager": "pnpm@11.7.0"
+}
