@@ -21,6 +21,10 @@ MassifX is organized as a pnpm monorepo.
 7. Backtests run against supplied OHLCV arrays and return metrics, trades, and equity curve.
 8. Backtest runs, trades, and equity points are persisted for the demo portfolio when Postgres is available.
 
+## OmniQuantAI Boundary
+
+MassifX consumes OmniQuantAI through a single `omniquant_client` module. The backtest API route now calls `POST /v1/backtests` through that client when `OMNIQUANT_API_URL` is configured. During the migration, it falls back to the local `@massifx/core` backtester and marks the response engine as `massifx-core-local-fallback`.
+
 ## Persistence Model
 
 The Prisma schema stores users, demo portfolios, paper trades, decision audits, backtest runs, backtest trades, and equity curve points. The web app calls persistence through a small server-side wrapper that degrades to demo-only mode if the database is unavailable.
