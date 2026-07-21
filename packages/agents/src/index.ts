@@ -29,6 +29,7 @@ export interface AgentDecisionInput {
   candles: Candle[];
   portfolioValue: number;
   riskState?: Partial<RiskState>;
+  requestId?: string;
 }
 
 export const sentinelAgentPlugin: AgentPlugin = {
@@ -76,6 +77,7 @@ export function createAgentRuntime(config: AgentRuntimeConfig = {}) {
       let decision: StrategyDecision;
       try {
         const signal = await runOmniQuantSignalGeneration({
+          requestId: params.requestId,
           strategyId: selected.manifest.id,
           symbol: params.symbol,
           candles: params.candles,

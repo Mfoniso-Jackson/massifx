@@ -1,6 +1,7 @@
 import type { Candle, StrategyDecision } from "@massifx/core";
 
 export interface OmniQuantSignalRequest {
+  requestId?: string;
   strategyId: string;
   symbol: string;
   portfolioValue: number;
@@ -43,7 +44,7 @@ export async function runOmniQuantSignalGeneration(request: OmniQuantSignalReque
       method: "POST",
       headers: {
         "content-type": "application/json",
-        "x-request-id": createRequestId(),
+        "x-request-id": request.requestId ?? createRequestId(),
         ...(process.env.OMNIQUANT_API_KEY ? { authorization: `Bearer ${process.env.OMNIQUANT_API_KEY}` } : {})
       },
       body: JSON.stringify(request),

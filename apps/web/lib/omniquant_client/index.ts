@@ -2,6 +2,7 @@ import type { BacktestResult, Candle } from "@massifx/core";
 import type { RiskResult, RiskState, StrategyDecision } from "@massifx/core";
 
 export interface OmniQuantBacktestRequest {
+  requestId?: string;
   symbol: string;
   strategyId: string;
   initialBalance: number;
@@ -16,6 +17,7 @@ export interface OmniQuantBacktestResponse extends BacktestResult {
 }
 
 export interface OmniQuantRiskRequest {
+  requestId?: string;
   portfolioId?: string;
   symbol: string;
   side?: "buy" | "sell";
@@ -29,6 +31,7 @@ export interface OmniQuantRiskRequest {
 }
 
 export interface OmniQuantSignalRequest {
+  requestId?: string;
   strategyId: string;
   symbol: string;
   portfolioValue: number;
@@ -53,6 +56,7 @@ export interface OmniQuantSignalResponse {
 }
 
 export interface OmniQuantPrepareOrderRequest {
+  requestId?: string;
   portfolioId?: string;
   signalId?: string;
   riskApprovalId?: string;
@@ -107,6 +111,7 @@ export interface OmniQuantPaperAccount {
 }
 
 export interface OmniQuantExecutePaperOrderRequest {
+  requestId?: string;
   orderId?: string;
   mode: "paper";
   account: OmniQuantPaperAccount;
@@ -172,7 +177,7 @@ export async function runOmniQuantBacktest(request: OmniQuantBacktestRequest): P
       method: "POST",
       headers: {
         "content-type": "application/json",
-        "x-request-id": createRequestId(),
+        "x-request-id": requestIdFromPayload(request),
         ...(process.env.OMNIQUANT_API_KEY ? { authorization: `Bearer ${process.env.OMNIQUANT_API_KEY}` } : {})
       },
       body: JSON.stringify(request),
@@ -202,6 +207,11 @@ export async function runOmniQuantBacktest(request: OmniQuantBacktestRequest): P
 
 function createRequestId(): string {
   return globalThis.crypto?.randomUUID?.() ?? `req_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+}
+
+function requestIdFromPayload(request: unknown): string {
+  const requestId = (request as { requestId?: unknown }).requestId;
+  return typeof requestId === "string" && requestId.trim() ? requestId : createRequestId();
 }
 
 export async function runOmniQuantRiskEvaluation(request: OmniQuantRiskRequest): Promise<OmniQuantRiskResponse> {
@@ -311,6 +321,7 @@ async function postJson(endpoint: string, request: unknown): Promise<Response> {
       method: "POST",
       headers: {
         "content-type": "application/json",
+        "x-request-id": requestIdFromPayload(request),
         ...(process.env.OMNIQUANT_API_KEY ? { authorization: `Bearer ${process.env.OMNIQUANT_API_KEY}` } : {})
       },
       body: JSON.stringify(request),
