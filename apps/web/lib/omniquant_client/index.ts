@@ -172,6 +172,7 @@ export async function runOmniQuantBacktest(request: OmniQuantBacktestRequest): P
       method: "POST",
       headers: {
         "content-type": "application/json",
+        "x-request-id": createRequestId(),
         ...(process.env.OMNIQUANT_API_KEY ? { authorization: `Bearer ${process.env.OMNIQUANT_API_KEY}` } : {})
       },
       body: JSON.stringify(request),
@@ -197,6 +198,10 @@ export async function runOmniQuantBacktest(request: OmniQuantBacktestRequest): P
   } finally {
     clearTimeout(timeout);
   }
+}
+
+function createRequestId(): string {
+  return globalThis.crypto?.randomUUID?.() ?? `req_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 }
 
 export async function runOmniQuantRiskEvaluation(request: OmniQuantRiskRequest): Promise<OmniQuantRiskResponse> {

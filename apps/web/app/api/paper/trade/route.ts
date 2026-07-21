@@ -1,5 +1,6 @@
 import { produceAgentDecision } from "@massifx/agents";
-import { generateDemoCandles, simulatePaperTrade } from "@massifx/core";
+import { generateDemoCandles } from "@massifx/core";
+import type { PaperAccount, RiskState, StrategyDecision } from "@massifx/core";
 import { NextResponse } from "next/server";
 import { persistAgentDecision } from "@/lib/persistence";
 import { OmniQuantClientUnavailableError, runOmniQuantExecutePaperOrder, runOmniQuantPrepareOrder, runOmniQuantRiskEvaluation } from "@/lib/omniquant_client";
@@ -95,14 +96,29 @@ export async function POST() {
   }
 
   return NextResponse.json({
-    ...simulatePaperTrade({
+    ...await runLocalPaperFallback({
       account,
-      symbol: "BTCUSDT",
       price,
       decision: decision.decision,
       riskState
     }),
     riskSource: "local-fallback",
     persistence
+  });
+}
+
+async function runLocalPaperFallback(params: {
+  account: PaperAccount;
+  price: number;
+  decision: StrategyDecision;
+  riskState: RiskState;
+}) {
+  const { simulatePaperTrade } = await import("@massifx/core");
+  return simulatePaperTrade({
+    account: params.account,
+    symbol: "BTCUSDT",
+    price: params.price,
+    decision: params.decision,
+    riskState: params.riskState
   });
 }

@@ -43,6 +43,7 @@ export async function runOmniQuantSignalGeneration(request: OmniQuantSignalReque
       method: "POST",
       headers: {
         "content-type": "application/json",
+        "x-request-id": createRequestId(),
         ...(process.env.OMNIQUANT_API_KEY ? { authorization: `Bearer ${process.env.OMNIQUANT_API_KEY}` } : {})
       },
       body: JSON.stringify(request),
@@ -85,4 +86,8 @@ function privateEndpoint(path: string): string {
   }
 
   return new URL(path, baseUrl).toString();
+}
+
+function createRequestId(): string {
+  return globalThis.crypto?.randomUUID?.() ?? `req_${Date.now()}_${Math.random().toString(36).slice(2)}`;
 }
